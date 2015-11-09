@@ -149,19 +149,17 @@ else {
 #endregion
 
 #region COMPARE VERSIONS
-if ([version]::TryParse('1.2.3.4',[ref]$FPServerVersion)) {
-    $FPServerVersionParsed = [version]::Parse($FPServerVersion)
-}
-else {
+## TRY PARSE SERVER VERSION
+if ( !([version]::TryParse($FPServerVersion,[ref]$FPServerVersionParsed)) ) {
+
     $Message = "Can't parse INTERNAL server version: [$FPServerVersion]!"
     Write-Host -f Red $Message
     Send-MailMessage -Body $Message -Subject 'FLASH PLAYER UPDATE ERROR' -Encoding UTF8 -BodyAsHtml @MailParams
     break
 }
-if ([version]::TryParse('1.2.3.4',[ref]$FullVersion)) {
-    $FPAdobeVersionParsed = [version]::Parse($FullVersion)
-}
-else {
+## TRY PARSE ADOBE VERSION
+if ( !([version]::TryParse($FullVersion,[ref]$FPAdobeVersionParsed)) ) {
+
     $Message = "Can't parse ADOBE server version: [$FullVersion]!"
     Write-Host -f Red $Message
     Send-MailMessage -Body $Message -Subject 'FLASH PLAYER UPDATE ERROR' -Encoding UTF8 -BodyAsHtml @MailParams
