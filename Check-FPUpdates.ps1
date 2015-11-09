@@ -1,5 +1,5 @@
 #requires -version 3.0
-#https://www.microsoft.com/en-us/download/details.aspx?id=48729
+#https://www.microsoft.com/en-us/download/details.aspx?id=40855
 
 <#
     Check for Adobe Flash Player updates
