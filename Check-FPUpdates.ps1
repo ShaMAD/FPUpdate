@@ -102,11 +102,12 @@ catch {
 }
 #endregion
 
-#region GET MACROMEDIA VERSION
-Write-Host -f Gray "Getting MACROMEDIA server version..." -NoNewline
+#region GET ADOBE VERSION
+
 
 if ($ESR) {
     ## ESR VERSION CHECK
+    Write-Host -f Gray "Getting ADOBE server version (ESR)..." -NoNewline
     try{
         $tempfile = New-TemporaryFile
         Invoke-WebRequest -Uri 'https://www.adobe.com/products/flashplayer/distribution3.html' -OutFile $tempfile @WebrequestParams
@@ -117,12 +118,13 @@ if ($ESR) {
     }
     catch {
         Write-Host -f Red 'FAIL!'
-        Write-Host -f Red "Can't verify MACROMEDIA server version! Error: [$($_.Exception.Message)]."
+        Write-Host -f Red "Can't verify ADOBE server version! Error: [$($_.Exception.Message)]."
         break
     }
 }
 else {
     ## PUBLIC VERSION CHECK
+    Write-Host -f Gray "Getting ADOBE server version..." -NoNewline
     try {
         ## MAJOR
         $VersionMajor = $TempData = $null
@@ -173,8 +175,16 @@ if ($FPAdobeVersionParsed -gt $FPServerVersionParsed) {
     Server version: <b>$FPServerVersion</b><br /><br />
     <a href='https://www.adobe.com/products/flashplayer/distribution3.html'>Download link</a>"
     
-    Write-Host -f Green $Message
-    Send-MailMessage -Body $HTMLMessage -Subject 'FLASH PLAYER UPDATE' -Encoding UTF8 -BodyAsHtml @MailParams
+    Write-Host -f Gray "Sending mail... "
+    try {
+        Send-MailMessage -Body $HTMLMessage -Subject 'FLASH PLAYER UPDATE AVAILABLE' -Encoding UTF8 -BodyAsHtml @MailParams
+        Write-Host -f Green 'OK'
+    }
+    catch {
+        Write-Host -f Red 'FAIL'
+        Write-Host -f Red "Mail not sent! Error was: [$($_.Exception.Message)]."
+        break
+    }
 }
 else {
     Write-Host -f Gray "Flash Player is Up-To-Date."
