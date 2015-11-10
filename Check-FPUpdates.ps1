@@ -144,13 +144,15 @@ else {
     }
     catch {
         Write-Host -f Red 'FAIL!'
-        Write-Host -f Red "Can't verify MACROMEDIA server version! Error: [$($_.Exception.Message)]."
+        Write-Host -f Red "Can't verify ADOBE server version! Error: [$($_.Exception.Message)]."
         break
     }
 }
 #endregion
 
 #region COMPARE VERSIONS
+[version]$FPServerVersionParsed = $null
+[version]$FPAdobeVersionParsed = $null
 ## TRY PARSE SERVER VERSION
 if ( !([version]::TryParse($FPServerVersion,[ref]$FPServerVersionParsed)) ) {
 
