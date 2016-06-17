@@ -8,11 +8,11 @@
     Version: 20160401
 
     Syntax:
-        FPCheckUpdate.ps1 -FPIntServerRoot <string> [-FPDownloadRoot <string>] [-XMLMajor <string>] [-ESR <string>] [-Proxy <string>] [-ProxyCreds <string>] [-UserAgent <string>] [-Force] [-SmtpServer <string>] [-LogFile <string>] [<CommonParameters>]
-        FPCheckUpdate.ps1 -FPIntServerRoot <string> -MailTo <mailaddress[]> -MailFrom <mailaddress> [-FPDownloadRoot <string>] [-XMLMajor <string>] [-ESR <string>] [-Proxy <string>] [-ProxyCreds <string>] [-UserAgent <string>] [-Force] [-SmtpServer <string>] [-LogFile <string>] [<CommonParameters>]
+        FPCheckUpdate.ps1 -FPIntServerRoot <string> [-FPDownloadRoot <string>] [-XMLMajor <string>] [-ESR] [-Proxy <string>] [-ProxyCreds <string>] [-UserAgent <string>] [-Force] [-SmtpServer <string>] [-LogFile <string>] [<CommonParameters>]
+        FPCheckUpdate.ps1 -FPIntServerRoot <string> -MailTo <mailaddress[]> -MailFrom <mailaddress> [-SmtpServer <string>] [-FPDownloadRoot <string>] [-XMLMajor <string>] [-ESR <string>] [-Proxy <string>] [-ProxyCreds <string>] [-UserAgent <string>] [-Force] [-LogFile <string>] [<CommonParameters>]
 
     Example:
-        .\FPCheckUpdate.ps1 -FPIntServerRoot 'fp-update.domain.local' -ESR '123098abc-blah-blah-blah-098765432' -Proxy 'http://proxy.domain.local' -UserAgent InternetExplorer -Force -MailTo 'admin@company.com','support@company.com' -MailFrom 'FP@company.com' -SmtpServer 'smtp.company.com'
+        .\FPCheckUpdate.ps1 -FPIntServerRoot 'fp-update.domain.local' -ESR -Proxy 'http://proxy.domain.local' -UserAgent InternetExplorer -Force -MailTo 'admin@company.com','support@company.com' -MailFrom 'FP@company.com' -SmtpServer 'smtp.company.com'
 #>
 
 [CmdletBinding(DefaultParametersetName="Default")]
@@ -23,7 +23,7 @@ param(
     [string]$FPIntServerRoot,
     [string]$FPDownloadRoot = 'fpdownload2.macromedia.com/pub/flashplayer/update/current/sau',
     [string]$XMLMajor = "currentmajor.xml",
-    [string]$ESR,
+    [switch]$ESR,
 
     #WEBREQUEST
     [string]$Proxy,
@@ -44,10 +44,12 @@ param(
 )
 
 $FPIntServerRoot += '/pub/flashplayer/update/current/sau'
+<#
 if ($ESR) {
-    $ESR = "https://www.adobe.com/ru/products/flashplayer/distribution4.html?auth=$ESR"
+    $ESR = "https://www.adobe.com/ru/products/flashplayer/distribution3.html"
     Write-Debug -Message "ESR link: [$ESR]"
 }
+#>
 
 function Write-Log {
     param(
@@ -170,7 +172,7 @@ for ($i = 0; $i -le 10; $i++) {
         Write-Log "Getting ADOBE server version (ESR)...`t" -NoNewline
         try{
             $tempfile = [system.io.path]::GetTempFileName()
-            Invoke-WebRequest -Uri $ESR -OutFile $tempfile -ErrorAction Stop @WebrequestParams
+            Invoke-WebRequest -Uri "https://www.adobe.com/ru/products/flashplayer/distribution3.html" -OutFile $tempfile -ErrorAction Stop @WebrequestParams
         
             $versions = @()
             $rx = [System.Text.RegularExpressions.Regex]('(?:[^\d]|^)(?<v>\d+\.\d+\.\d+\.\d+)(?:[^\d]|$)')
