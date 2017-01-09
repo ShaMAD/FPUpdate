@@ -5,6 +5,8 @@
     Download updates from Adobe to your local Flash Player update server.
     
     By n01d | https://github.com/0-d/FPUpdate
+    
+    Usage: powershell.exe -command "& '.\FPUpdater.ps1' -FPRoot '\\FlashPlayerUpdate' -DownloadProxy 'http://proxy.domain.local' -ProxyCreds 'DOMAIN\UserName' -UserAgent 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'" -Force
 #>
 
 param(
@@ -93,7 +95,32 @@ catch {
     break
 }
 
-11,15,16,17,18,19 | ForEach-Object {
+#region CHECKING UPDATES
+try {
+    Write-Host -f Gray "Reading [currentmajor.xml]... " -NoNewline
+    $Data = [Xml] (Get-Content "$FPRoot\currentmajor.xml" -ErrorAction Stop)
+    $FPVersion = $Data.version.Player.major
+    Write-Host -f Green 'OK'
+}
+catch {
+    Write-Host -f Red 'FAIL'
+    Write-Host -f Red "Unable to Read  [$FPRoot\currentmajor.xm]!"
+
+    break
+}
+
+try {
+    Write-Host -f Gray "Checking version [$FPVersion]... " -NoNewline
+    $FPFiles = Get-ChildItem "$FPRoot\$FPVersion" -ErrorAction Stop
+    Write-Host -f Red 'FAIL'
+    Write-Host -f Red "Version [$FPVersion] already exist... "
+    break
+}
+catch {
+    Write-Host -f Green 'OK'
+}
+
+$FPVersion | ForEach-Object {
     
     $DestXML = "$FPRoot\$_\xml"
     $DestInstall = "$FPRoot\$_\install"
@@ -131,7 +158,7 @@ catch {
             Remove-Item -Path $DestXML
         }
         if ( !(Get-ChildItem -Path $DestInstall) ) {
-            Remove-Item -Path $DestXML
+            Remove-Item -Path $DestInstall
         }
         if ( !(Get-ChildItem -Path "$FPRoot\$_") ) {
             Remove-Item -Path "$FPRoot\$_"
