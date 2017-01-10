@@ -93,7 +93,32 @@ catch {
     break
 }
 
-11,15,16,17,18,19 | ForEach-Object {
+#region CHECKING UPDATES
+try {
+    Write-Host -f Gray "Reading [currentmajor.xml]... " -NoNewline
+    $Data = [Xml] (Get-Content "$FPRoot\currentmajor.xml" -ErrorAction Stop)
+    $FPVersion = $Data.version.Player.major
+    Write-Host -f Green 'OK'
+}
+catch {
+    Write-Host -f Red 'FAIL'
+    Write-Host -f Red "Unable to Read  [$FPRoot\currentmajor.xm]!"
+
+    break
+}
+
+try {
+    Write-Host -f Gray "Checking version [$FPVersion]... " -NoNewline
+    $FPFiles = Get-ChildItem "$FPRoot\$FPVersion" -ErrorAction Stop
+    Write-Host -f Red 'FAIL'
+    Write-Host -f Red "Version [$FPVersion] already exist... "
+    break
+}
+catch {
+    Write-Host -f Green 'OK'
+}
+
+$FPVersion | ForEach-Object {
     
     $DestXML = "$FPRoot\$_\xml"
     $DestInstall = "$FPRoot\$_\install"
@@ -108,9 +133,10 @@ catch {
     $sourceXML = "https://$FPDownloadRoot/$_/xml/version.xml"
     $sourceWinAX = "http://$FPDownloadRoot/$_/install/install_all_win_ax_sgn.z"
     $sourceWinPL = "http://$FPDownloadRoot/$_/install/install_all_win_pl_sgn.z"
+    $sourceWinPEP = "http://$FPDownloadRoot/$_/install/install_all_win_pep_sgn.z"
     $sourceWin64AX = "http://$FPDownloadRoot/$_/install/install_all_win_64_ax_sgn.z"
     $sourceWin64PL = "http://$FPDownloadRoot/$_/install/install_all_win_64_pl_sgn.z"
-    $SourceInstall = $sourceWinAX,$sourceWinPL,$sourceWin64AX,$sourceWin64PL
+    $SourceInstall = $sourceWinAX,$sourceWinPL,$sourceWinPEP,$sourceWin64AX,$sourceWin64PL
     
     Write-Host -f Gray "Downloading files for Flash Player version [$_]... " -NoNewline
 
@@ -131,7 +157,7 @@ catch {
             Remove-Item -Path $DestXML
         }
         if ( !(Get-ChildItem -Path $DestInstall) ) {
-            Remove-Item -Path $DestXML
+            Remove-Item -Path $DestInstall
         }
         if ( !(Get-ChildItem -Path "$FPRoot\$_") ) {
             Remove-Item -Path "$FPRoot\$_"
